@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+
+  # =========================
+  # EUREKA SERVER
+  # =========================
+  eureka-server:
+    build: ./eureka-server
+    ports:
+      - "9999:9999"
+    restart: always
+
+  # =========================
+  # ZOOKEEPER
+  # =========================
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    restart: always
+
+  # =========================
+  # KAFKA
+  # =========================
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    restart: always
+
+  # =========================
+  # API GATEWAY
+  # =========================
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-admin:eureka-secret@eureka-server:9999/eureka/
+    restart: always
+
+  # =========================
+  # AUTH DB
+  # =========================
+  postgres-auth:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+
+  # =========================
+  # USER DB (MongoDB)
+  # =========================
+  mongodb:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+
+  # =========================
+  # TRANSACTION DB (MySQL)
+  # =========================
+  mysql-transaction:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: transaction_db
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - "3307:3306"
+
+  # =========================
+  # AUTH SERVICE
+  # =========================
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres-auth
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/auth_db
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-admin:eureka-secret@eureka-server:9999/eureka/
+
+  # =========================
+  # USER SERVICE
+  # =========================
+  user-service:
+    build: ./user-service
+    ports:
+      - "8088:8088"
+    depends_on:
+      - mongodb
+      - eureka-server
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/user_db
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-admin:eureka-secret@eureka-server:9999/eureka/
+
+  # =========================
+  # TRANSACTION SERVICE
+  # =========================
+  transaction-service:
+    build: ./transaction-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mysql-transaction
+      - kafka
+      - eureka-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-transaction:3306/transaction_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-admin:eureka-secret@eureka-server:9999/eureka/
+
+  # =========================
+  # NOTIFICATION SERVICE
+  # =========================
+  notification-service:
+    build: ./notification-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - kafka
+      - eureka-server
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-admin:eureka-secret@eureka-server:9999/eureka/

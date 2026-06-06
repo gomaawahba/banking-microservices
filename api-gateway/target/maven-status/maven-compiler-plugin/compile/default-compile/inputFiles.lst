@@ -1,0 +1,4 @@
+C:\Users\alnaseem\Videos\banking-microservices\api-gateway\src\main\java\com\banking\gateway\ApiGatewayApplication.java
+C:\Users\alnaseem\Videos\banking-microservices\api-gateway\src\main\java\com\banking\gateway\filter\AuthenticationFilter.java
+C:\Users\alnaseem\Videos\banking-microservices\api-gateway\src\main\java\com\banking\gateway\fallback\FallbackController.java
+C:\Users\alnaseem\Videos\banking-microservices\api-gateway\src\main\java\com\banking\gateway\config\GatewaySecurityConfig.java

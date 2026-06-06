@@ -1,0 +1,21 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: user-service
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/user_db
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-admin:eureka-secret@localhost:9999/eureka/
+
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    prefer-ip-address: true

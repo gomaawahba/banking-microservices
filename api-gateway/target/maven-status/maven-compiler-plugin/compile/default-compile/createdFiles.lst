@@ -1,0 +1,5 @@
+com\banking\gateway\fallback\FallbackController.class
+com\banking\gateway\config\GatewaySecurityConfig.class
+com\banking\gateway\filter\AuthenticationFilter$Config.class
+com\banking\gateway\filter\AuthenticationFilter.class
+com\banking\gateway\ApiGatewayApplication.class

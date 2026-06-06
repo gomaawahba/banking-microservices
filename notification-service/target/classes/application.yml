@@ -1,0 +1,87 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: notification-service
+
+  # =========================
+  # CONFIG SERVER (DISABLED FIX)
+  # =========================
+  cloud:
+    config:
+      enabled: false
+
+  # =========================
+  # DATABASE (POSTGRESQL)
+  # =========================
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notification_db
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # =========================
+  # KAFKA
+  # =========================
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+  # =========================
+  # EMAIL (GMAIL FIXED TLS)
+  # =========================
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: gabdo7403@gmail.com
+    password: "athm lqqd csez idsx"
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          ssl:
+            trust: smtp.gmail.com
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+        debug: true
+
+# =========================
+# EUREKA CLIENT
+# =========================
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-admin:eureka-secret@localhost:9999/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    prefer-ip-address: true
+
+# =========================
+# LOGGING
+# =========================
+logging:
+  level:
+    com.banking.notification: DEBUG
+    org.springframework.kafka: INFO
+    org.springframework.mail: DEBUG
